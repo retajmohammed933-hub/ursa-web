@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>اختبار الشكاوي</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #2fa4a4;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #1e7a7a;
+        }
+        .reports {
+            margin-top: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .report-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #2fa4a4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color:#2fa4a4; text-align:center;">📝 نظام الشكاوي</h1>
+        
+        <!-- الفورم الرئيسي -->
+        <form id="complaintForm">
+            <h3>إضافة شكوى جديدة</h3>
+            
+            <textarea id="desc" placeholder="اكتب الشكوى هنا..." rows="4" required></textarea>
+            
+            <select id="cat" required>
+                <option value="">اختر التصنيف</option>
+                <option value="حادث">حادث</option>
+                <option value="سرقة">سرقة</option>
+                <option value="طريق">طريق</option>
+                <option value="أضواء">أضواء</option>
+            </select>
+            
+            <button type="submit">➕ إضافة الشكوى</button>
+        </form>
+        
+        <!-- عرض الشكاوي -->
+        <div class="reports">
+            <h3>📋 الشكاوي المحفوظة</h3>
+            <div id="reportsList"></div>
+        </div>
+    </div>
+
+    <script>
+    // ========== كود بسيط ومضمون ==========
+    
+    // عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // جلب الشكاوي من localStorage
+        let complaints = JSON.parse(localStorage.getItem('complaints')) || [];
+        
+        // دالة عرض الشكاوي
+        function displayComplaints() {
+            const list = document.getElementById('reportsList');
+            if (complaints.length === 0) {
+                list.innerHTML = '<p style="color:gray;">لا توجد شكاوي بعد</p>';
+                return;
+            }
+            
+            let html = '';
+            complaints.forEach(c => {
+                html += `
+                    <div class="report-item">
+                        <p><strong>${c.description}</strong></p>
+                        <p>التصنيف: ${c.category}</p>
+                        <p style="color:gray; font-size:0.9em;">${c.date}</p>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+        
+        // عرض الشكاوي عند التحميل
+        displayComplaints();
+        
+        // التعامل مع الفورم
+        const form = document.getElementById('complaintForm');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // منع إعادة تحميل الصفحة
+            
+            // جمع البيانات
+            const description = document.getElementById('desc').value;
+            const category = document.getElementById('cat').value;
+            
+            // التحقق
+            if (!description || !category) {
+                alert('الرجاء إدخال جميع البيانات');
+                return;
+            }
+            
+            // إنشاء شكوى جديدة
+            const newComplaint = {
+                id: Date.now(),
+                description: description,
+                category: category,
+                date: new Date().toLocaleString('ar-EG')
+            };
+            
+            // إضافة للقائمة
+            complaints.push(newComplaint);
+            
+            // حفظ في localStorage
+            localStorage.setItem('complaints', JSON.stringify(complaints));
+            
+            // إظهار رسالة نجاح
+            alert('✅ تم حفظ الشكوى بنجاح');
+            
+            // مسح الحقول
+            document.getElementById('desc').value = '';
+            document.getElementById('cat').value = '';
+            
+            // تحديث العرض
+            displayComplaints();
+            
+            // عرض في console
+            console.log('جميع الشكاوي:', complaints);
+        });
+        
+        // اختبار localStorage
+        console.log('عدد الشكاوي المحفوظة:', complaints.length);
+    });
+    
+    // دالة مسح الكل (اختياري)
+    function clearAll() {
+        if (confirm('هل أنت متأكد؟')) {
+            localStorage.removeItem('complaints');
+            location.reload();
+        }
+    }
+    </script>
+    
+    <!-- زر مسح للاختبار -->
+    <button onclick="clearAll()" style="margin-top:20px; background:#ff6b6b;">مسح الكل</button>
+</body>
+</html>
